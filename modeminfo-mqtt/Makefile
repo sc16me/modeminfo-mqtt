@@ -45,6 +45,7 @@ endef
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_CONF) ./root/etc/config/modeminfo-mqtt $(1)/etc/config/modeminfo-mqtt
 	$(INSTALL_BIN) ./root/etc/init.d/modeminfo-mqtt $(1)/etc/init.d/
