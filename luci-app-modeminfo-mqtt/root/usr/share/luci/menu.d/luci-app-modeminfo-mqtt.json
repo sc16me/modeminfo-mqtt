@@ -1,5 +1,5 @@
 {
-	"admin/modem/modeminfo-mqtt": {
+	"admin/modem/main/modeminfo-mqtt": {
 		"title": "MQTT metrics",
 		"order": 70,
 		"action": {
