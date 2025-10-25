@@ -3,7 +3,7 @@
 'require uci';
 'require view';
 
-var discovery = _('Needed for automatic detection, for example for HomeAssistant.');
+var discovery = _('Needed for automatic detection in HomeAssistant.');
 
 return view.extend({
 	load: function () {

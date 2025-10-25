@@ -37,8 +37,8 @@ msgstr "Разрешить автообнаружение"
 msgid "Update interval"
 msgstr "Интервал обновления"
 
-msgid "Needed for automatic detection, for example for HomeAssistant."
-msgstr "Discovery, нужно для автоматического обнаружения, например для HomeAssistant."
+msgid "Needed for automatic detection in HomeAssistant."
+msgstr "Discovery, нужно для автоматического обнаружения в HomeAssistant."
 
 msgid "1 minute"
 msgstr "1 минута"
