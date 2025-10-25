@@ -21,7 +21,7 @@ define Package/$(PKG_NAME)
 endef
 
 define Package/$(PKG_NAME)/description
-	Add-on for ModemInfo: collects modem readings and publishes them to an MQTT server. Supports automatic discovery in Home Assistant.
+	Add-on for ModemInfo: collects modem readings and publishes them to an MQTT server. Supports automatic discovery in HomeAssistant.
 endef
 
 define Build/Prepare
