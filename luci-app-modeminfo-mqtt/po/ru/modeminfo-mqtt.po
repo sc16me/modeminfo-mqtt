@@ -51,3 +51,6 @@ msgstr "10 минут"
 
 msgid "15 minutes"
 msgstr "15 минут"
+
+msgid "Optional. If you leave it blank, the router name will be used."
+msgstr "Необязательно. Если оставить пустым, будет использовано имя роутера."

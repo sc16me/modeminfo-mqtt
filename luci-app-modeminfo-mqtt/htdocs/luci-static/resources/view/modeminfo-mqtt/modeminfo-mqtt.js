@@ -4,6 +4,7 @@
 'require view';
 
 var discovery = _('Needed for automatic detection in HomeAssistant.');
+var hostname = _('Optional. If you leave it blank, the router name will be used.');
 
 return view.extend({
 	load: function () {
@@ -43,6 +44,10 @@ return view.extend({
 		o.password = true;
 		o.placeholder = 'secret';
 		o.rmempty = false;
+
+		o = s.option(form.Value, 'hostname', _('Hostname'), hostname);
+		o.datatype = "hostname"
+		o.placeholder = 'Router';
 
 		o = s.option(form.Flag, 'discovery', _('Enable device discovery'), discovery);
 		o.default = '0';
