@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=modeminfo-mqtt
 PKG_VERSION:=1.1
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 PKG_MAINTAINER:=Aleksandr Danilov <sc16me@gmail.com>
 
 include $(INCLUDE_DIR)/package.mk
