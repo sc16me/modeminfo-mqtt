@@ -18,7 +18,7 @@ return view.extend({
 			_('An addon that sends modem metrics to the MQTT server.')
 		);
 
-		s = m.section(form.TypedSection, 'modem-mqtt', _('Settings'));
+		s = m.section(form.TypedSection, 'modeminfo-mqtt', _('Settings'));
 		s.anonymous = true;
 		s.addremove = false;
 
