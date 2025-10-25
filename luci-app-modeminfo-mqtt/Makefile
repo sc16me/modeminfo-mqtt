@@ -34,7 +34,7 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/share/luci/menu.d
 	$(INSTALL_DIR) $(1)/usr/share/rpcd/acl.d
-	$(INSTALL_DIR) $(1)/usr/share/rpcd/ucitrack
+	$(INSTALL_DIR) $(1)/usr/share/ucitrack
 
 	$(INSTALL_DIR) $(1)/www/luci-static/resources/view/modeminfo-mqtt
 
