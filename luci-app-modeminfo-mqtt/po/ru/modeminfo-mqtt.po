@@ -1,0 +1,53 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "MQTT metrics"
+msgstr "MQTT метрики"
+
+msgid "MQTT metrics addon"
+msgstr "MQTT метрики"
+
+msgid "MQTT metrics addon"
+msgstr "MQTT метрики модема"
+
+msgid "An addon that sends modem metrics to the MQTT server."
+msgstr "Дополнение для отправки метрик модема на MQTT сервер."
+
+msgid "Service Enabled"
+msgstr "Включить сервис"
+
+msgid "MQTT server address"
+msgstr "Адрес MQTT сервера"
+
+msgid "MQTT server port"
+msgstr "Порт MQTT сервера"
+
+msgid "MQTT server port"
+msgstr "Порт MQTT сервера"
+
+msgid "MQTT login"
+msgstr "MQTT логин"
+
+msgid "MQTT password"
+msgstr "MQTT пароль"
+
+msgid "Enable device discovery"
+msgstr "Разрешить автообнаружение"
+
+msgid "Update interval"
+msgstr "Интервал обновления"
+
+msgid "Needed for automatic detection, for example for HomeAssistant."
+msgstr "Discovery, нужно для автоматического обнаружения, например для HomeAssistant."
+
+msgid "1 minute"
+msgstr "1 минута"
+
+msgid "5 minutes"
+msgstr "5 минут"
+
+msgid "10 minutes"
+msgstr "10 минут"
+
+msgid "15 minutes"
+msgstr "15 минут"

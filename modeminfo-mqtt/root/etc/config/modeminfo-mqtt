@@ -1,0 +1,10 @@
+
+config modeminfo-mqtt 'main'
+	option enabled '0'
+	option server 'localhost'
+	option port '1883'
+	option login 'mqtt'
+	option pass 'secret'
+	option discovery '0'
+	option timeout '60'
+

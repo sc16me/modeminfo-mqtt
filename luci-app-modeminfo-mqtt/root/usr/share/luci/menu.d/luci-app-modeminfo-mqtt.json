@@ -1,0 +1,10 @@
+{
+	"admin/modem/modeminfo-mqtt": {
+		"title": "MQTT metrics",
+		"order": 70,
+		"action": {
+			"type": "view",
+			"path": "modeminfo-mqtt/modeminfo-mqtt"
+		}
+	}
+}

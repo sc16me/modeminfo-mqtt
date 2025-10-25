@@ -1,0 +1,164 @@
+#!/bin/sh
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--discovery) DISCOVERY="$2"; shift 2;;
+		--server)    SERVER="$2"; shift 2;;
+		--port)      PORT="$2"; shift 2;;
+		--login)     LOGIN="$2"; shift 2;;
+		--pass)      PASS="$2"; shift 2;;
+		--hostname)  HOSTNAME="$2"; shift 2;;
+		*) echo "Unknown parameter: $1"; shift;;
+	esac
+done
+
+if [ -z "$DISCOVERY" ] || [ -z "$SERVER" ] || [ -z "$PORT" ] || [ -z "$LOGIN" ] || [ -z "$PASS" ] || [ -z "$HOSTNAME" ]; then
+	exit 1
+fi
+
+# Vars
+NAME=$(echo "$HOSTNAME" | awk '{print tolower($0)}')
+DISPLAY_NAME="$(echo "$HOSTNAME") Modem"
+TOPIC="$NAME/modem"
+DISC_BASE="homeassistant"
+DATA=$(modeminfo)
+
+
+# Functions
+mqtt_push() {
+	mosquitto_pub -h "$SERVER" -p "$PORT" -t "$TOPIC/$1/state" -r -m "$2" -u "$LOGIN" -P "$PASS" -q 1
+}
+
+mqtt_publish_config() {
+	local comp="$1"
+	local obj="$2"
+	local json="$3"
+	local topic="$DISC_BASE/$comp/$obj/config"
+	mosquitto_pub -h "$SERVER" -p "$PORT" -t "$topic" -r -m "$json" -u "$LOGIN" -P "$PASS" -q 1
+}
+
+mqtt_discovery() {
+	local id="$1"
+	local name="$2"
+	local unit="$3"
+	local devclass="$4"
+	local icon="$5"
+	local obj_id="${NAME}_modem_${id}"
+	local state_topic="$TOPIC/$id/state"
+
+	local json="{\
+\"name\":\"${name}\",\
+\"unique_id\":\"${obj_id}\",\
+\"state_topic\":\"${state_topic}\",\
+\"force_update\":true,\
+\"qos\":1,\
+\"device\":{\
+\"identifiers\":[\"${NAME}_modem\",\"${IMEI:-unknown_imei}\"],\
+\"name\":\"${DISPLAY_NAME}\",\
+\"sw_version\":\"${FIRMWARE:-unknown}\",\
+\"model\":\"${DEVICE:-Modem}\"\
+}"
+
+	[ -n "$unit" ] && json="$json,\"unit_of_measurement\":\"$unit\""
+	[ -n "$devclass" ] && json="$json,\"device_class\":\"$devclass\""
+	[ -n "$icon" ] && json="$json,\"icon\":\"$icon\""
+
+	json="$json}"
+	mqtt_publish_config sensor "$obj_id" "$json"
+}
+
+
+# Parse data
+eval $(jsonfilter -s "$DATA" \
+	-e "DEVICE=@.modem[0].device" \
+	-e "FIRMWARE=@.modem[0].firmware" \
+	-e "MODE=@.modem[0].mode" \
+	-e "RSSI=@.modem[0].rssi" \
+	-e "RSRQ=@.modem[0].rsrq" \
+	-e "RSRP=@.modem[0].rsrp" \
+	-e "SINR=@.modem[0].sinr" \
+	-e "ENBID=@.modem[0].enbid" \
+	-e "ARFCN=@.modem[0].arfcn" \
+	-e "SCC=@.modem[0].scc" \
+	-e "BWCA=@.modem[0].bwca" \
+	-e "BWDL=@.modem[0].bwdl" \
+	-e "LTECA=@.modem[0].lteca" \
+	-e "IMEI=@.modem[0].imei" \
+	-e "COPS=@.modem[0].cops" \
+	-e "NUMBER=@.modem[0].number" \
+	-e "DIST=@.modem[0].distance" \
+	-e "CHIPTEMP=@.modem[0].chiptemp" )
+
+
+# Band detection
+if [ "$ARFCN" -ge 0 ] && [ "$ARFCN" -le 599 ]; then BAND="1"
+elif [ "$ARFCN" -ge 600 ] && [ "$ARFCN" -le 1199 ]; then BAND="2"
+elif [ "$ARFCN" -ge 1200 ] && [ "$ARFCN" -le 1949 ]; then BAND="3"
+elif [ "$ARFCN" -ge 1950 ] && [ "$ARFCN" -le 2399 ]; then BAND="4"
+elif [ "$ARFCN" -ge 2400 ] && [ "$ARFCN" -le 2469 ]; then BAND="5"
+elif [ "$ARFCN" -ge 2750 ] && [ "$ARFCN" -le 3449 ]; then BAND="7"
+elif [ "$ARFCN" -ge 3450 ] && [ "$ARFCN" -le 3799 ]; then BAND="8"
+elif [ "$ARFCN" -ge 6150 ] && [ "$ARFCN" -le 6449 ]; then BAND="20"
+elif [ "$ARFCN" -ge 9210 ] && [ "$ARFCN" -le 9659 ]; then BAND="28"
+elif [ "$ARFCN" -ge 9870 ] && [ "$ARFCN" -le 9919 ]; then BAND="31"
+elif [ "$ARFCN" -ge 37750 ] && [ "$ARFCN" -le 38249 ]; then BAND="38"
+elif [ "$ARFCN" -ge 38650 ] && [ "$ARFCN" -le 39649 ]; then BAND="40"
+else BAND="0"; fi
+
+CC=$BAND$SCC
+
+if [ "$LTECA" -gt 0 ]; then
+	BANDWIDTH="$BWCA"
+else
+	case "$BWDL" in
+		0) BANDWIDTH="1.4";;
+		1) BANDWIDTH="3";;
+		2) BANDWIDTH="5";;
+		3) BANDWIDTH="10";;
+		4) BANDWIDTH="15";;
+		5) BANDWIDTH="20";;
+	esac
+fi
+
+case "$MODE" in
+	WCDMA) OUT_MODE="3G";;
+	*) OUT_MODE="$MODE";;
+esac
+
+
+# Discovery states
+if [ "$DISCOVERY" -eq 1 ]; then
+	mqtt_discovery "imei" "IMEI" "" "" "mdi:cellphone-information"
+	mqtt_discovery "operator" "Operator" "" "" "mdi:sim"
+	mqtt_discovery "number" "Phone Number" "" "" "mdi:phone-classic"
+	mqtt_discovery "rssi" "RSSI" "dBm" "signal_strength" "mdi:signal"
+	mqtt_discovery "rsrq" "RSRQ" "dB" "" "mdi:signal"
+	mqtt_discovery "rsrp" "RSRP" "dBm" "" "mdi:signal"
+	mqtt_discovery "sinr" "SINR" "dB" "" "mdi:signal"
+	mqtt_discovery "tower" "Cell Tower" "" "" "mdi:radio-tower"
+	mqtt_discovery "aggregation" "Aggregation" "" "" "mdi:radio-tower"
+	mqtt_discovery "bandwidth" "Bandwidth" "MHz" "" "mdi:signal-distance-variant"
+	mqtt_discovery "temperature" "Temperature" "°C" "temperature" "mdi:thermometer"
+	mqtt_discovery "distance" "Distance to Tower" "km" "" "mdi:map-marker-distance"
+	mqtt_discovery "mode" "Network Mode" "" "" "mdi:network"
+else
+	for topic in imei operator number rssi rsrq rsrp sinr tower aggregation bandwidth temperature distance mode; do
+		mosquitto_pub -h "$SERVER" -p "$PORT" -t "$DISC_BASE/sensor/${NAME}_modem_$topic/config" -r -n -u "$LOGIN" -P "$PASS" -q 1
+	done
+fi
+
+
+# Publish states
+[ -n "$OUT_MODE" ] && mqtt_push mode "$OUT_MODE"
+[ -n "$RSSI" ] && mqtt_push rssi "$RSSI"
+[ -n "$RSRQ" ] && mqtt_push rsrq "$RSRQ"
+[ -n "$RSRP" ] && mqtt_push rsrp "$RSRP"
+[ -n "$SINR" ] && mqtt_push sinr "$SINR"
+[ -n "$ENBID" ] && mqtt_push tower "$ENBID"
+[ -n "$CC" ] && [ "$CC" != "0" ] && mqtt_push aggregation "$CC"
+[ -n "$BANDWIDTH" ] && mqtt_push bandwidth "$BANDWIDTH"
+[ -n "$IMEI" ] && mqtt_push imei "$IMEI"
+[ -n "$COPS" ] && mqtt_push operator "$COPS"
+[ -n "$DIST" ] && mqtt_push distance "$DIST"
+[ -n "$NUMBER" ] && mqtt_push number "$NUMBER"
+[ -n "$CHIPTEMP" ] && [ "$CHIPTEMP" != "--" ] && mqtt_push temperature "$CHIPTEMP"

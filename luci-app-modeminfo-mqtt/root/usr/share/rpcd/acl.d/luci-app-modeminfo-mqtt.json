@@ -1,0 +1,11 @@
+{
+	"luci-app-modeminfo-mqtt": {
+		"description": "Grant UCI access for luci-app-modeminfo-mqtt",
+		"read": {
+			"uci": [ "modeminfo-mqtt" ]
+		},
+		"write": {
+			"uci": [ "modeminfo-mqtt" ]
+		}
+	}
+}
